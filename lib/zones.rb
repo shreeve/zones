@@ -1,5 +1,38 @@
 require "tzinfo"
 
+class Date
+  def self.parse_str(str)
+    case str
+    when %r!^((?:19|20)\d\d)(\d\d)(\d\d)(\d\d)!
+      ymd = [$1.to_i, $2.to_i, $3.to_i]
+    when %r!^
+      (?:(0[1-9]|[12]\d|3[01]|[1-9][-/ ])[-/ ]? #  $1: day
+         ((?>[a-z]{3,9}))[-/ ]?                 #  $2: month
+         ((?>19|20)\d\d)                        #  $3: year
+      | # or...
+         ((?>19|20)\d\d)[-/]?                   #  $4: year
+         (0[1-9]|1[012]|[1-9][-/])[-/]?         #  $5: month
+         (0[1-9]|[12]\d|3[01]|[1-9][\sT])       #  $6: day
+      | # or...
+         (0[1-9]|1[012]|[1-9][-/])[-/]?         #  $7: month
+         (0[1-9]|[12]\d|3[01]|[1-9][-/])[-/]?   #  $8: day
+         ((?>19|20)\d\d)                        #  $9: year
+      )
+    !iox
+      ymd = $1 ? [$3.to_i, month_num($2), $1.to_i] : $4 ? [$4.to_i, $5.to_i, $6.to_i] : [$9.to_i, $7.to_i, $8.to_i]
+    else
+      raise "can't parse: #{str}"
+    end
+    ymd
+  end
+
+  # parse date
+  def self.to_day(str)
+    ymd = parse_str(str)
+    out = Date.new(*ymd)
+  end
+end
+
 class Time
   def self.parse_str(str, ignore_offset=false)
     case str
@@ -94,5 +127,13 @@ class String
 
   def to_tz!(*args)
     Time.to_tz!(self, *args)
+  end
+
+  def to_day
+    Date.to_day(self)
+  end
+
+  def to_day!(fmt="%Y-%m-%d")
+    to_day.strftime(fmt)
   end
 end
