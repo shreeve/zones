@@ -103,21 +103,28 @@ class Time
     to_tz(str, zone, true)
   end
 
-  # transform time to new timezone
-  def to_tz(to_tz)
-    utc = utc? ? self : getutc
-    raw = TZInfo::Timezone.get(to_tz).utc_to_local(utc)
-    all = raw.to_a[1,5].reverse.push(strftime("%S.%6N").to_f) # retain fractional seconds
-    out = Time.new(*all, raw - utc)
+  # NOTE: We can clean this up too...
+  # this 1-liner works, but returns a TZInfo::TimeWithOffset???
+  # def in_tz(zone); TZInfo::Timezone.get(zone).to_local(self); end
+
+  # same time moment, different time zone offset
+  def in_tz(zone)
+    cfg = TZInfo::Timezone.get(zone)
+    use = cfg.to_local(self)
+    ary = use.to_a[1,5].reverse.push(strftime("%S.%6N").to_f)
+    Time.new(*ary, cfg)
   end
 
-  # preserve time but change offset
-  def to_tz!(to_tz)
-    all = to_a[1,5].reverse.push(strftime("%S.%6N").to_f) # retain fractional seconds
-    raw = Time.utc(*all)
-    utc = TZInfo::Timezone.get(to_tz).local_to_utc(raw)
-    out = Time.new(*all, raw - utc)
+  # same time values, different time zone offset
+  def as_tz(zone)
+    cfg = TZInfo::Timezone.get(zone)
+    use = self
+    ary = use.to_a[1,5].reverse.push(strftime("%S.%6N").to_f)
+    Time.new(*ary, cfg)
   end
+
+  alias_method :to_tz , :in_tz
+  alias_method :to_tz!, :as_tz
 end
 
 class String
