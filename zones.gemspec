@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name        = "zones"
-  s.version     = "0.6.1"
+  s.version     = "0.6.2"
   s.author      = "Steve Shreeve"
   s.email       = "steve.shreeve@gmail.com"
   s.summary     = "Easy time parsing and conversion between time zones"
