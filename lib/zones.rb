@@ -82,15 +82,15 @@ class Time
   end
 
   # parse time and honor desired timezone
-  def self.to_tz(str, to_tz=nil, ignore_offset=false)
+  def self.to_tz(str, zone=nil, ignore_offset=false)
     ymd, hms, off = parse_str(str, ignore_offset)
     out = Time.new(*ymd, *hms, off)
-    if to_tz
+    if zone
       if off
-        out = out.to_tz(to_tz)
+        out = out.to_tz(zone)
       else
         utc = out.utc
-        off = TZInfo::Timezone.get(to_tz).utc_to_local(utc) - utc
+        off = TZInfo::Timezone.get(zone).utc_to_local(utc) - utc
         out = Time.new(*ymd, *hms, off)
       end
     else
@@ -99,8 +99,8 @@ class Time
   end
 
   # ignore supplied timezone, use local
-  def self.to_tz!(str, to_tz=nil)
-    to_tz(str, to_tz, true)
+  def self.to_tz!(str, zone=nil)
+    to_tz(str, zone, true)
   end
 
   # transform time to new timezone
