@@ -39,7 +39,7 @@ class Time
     when %r!^((?:19|20)\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)?\.?(\d+)?([-+]\d\d:?\d\d)?!
       ymd = [$1.to_i, $2.to_i, $3.to_i]
       hms = [$4.to_i, $5.to_i, "#{$6}.#{$7}".to_f]
-      off = $8.sub(/(\d)(\d\d)$/,"\1:\2") if $8 && !ignore_offset
+      off = $8.sub(/(\d)(\d\d)$/,'\1:\2') if $8 && !ignore_offset
     when %r!^
       (?:(0[1-9]|[12]\d|3[01]|[1-9][-/ ])[-/ ]? #  $1: day
          ((?>[a-z]{3,9}))[-/ ]?                 #  $2: month
