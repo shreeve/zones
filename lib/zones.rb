@@ -81,7 +81,7 @@ class Time
       :?(\d\d)?                                            # $12: sec
       \.?(\d+)?                                            # $13: dec
       \s?(?:(a|p)?m)?                                      # $14: am/pm
-      \s?(([-+])?(\d\d):?(\d\d)|UTC|GMT)?                  # $15: offset ($16=sign, $17=hours, $18=mins)
+      \s?(([-+])?(\d\d):?(\d\d)|UTC|GMT|Z)?                # $15: offset ($16=sign, $17=hours, $18=mins)
     !iox
       ymd =   $1 ? [ $3.to_i, month_value($2), $1.to_i] : \
               $4 ? [ $4.to_i, month_value($5), $6.to_i] : \
