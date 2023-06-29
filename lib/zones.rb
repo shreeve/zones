@@ -94,68 +94,47 @@ class Time
     [ymd, hms, off]
   end
 
+  def self.tz(str, toz=nil, asz=nil)
+    ymd, hms, off = parse_str(str)
+    out = Time.new(*ymd, *hms, asz ? TZInfo::Timezone.get(asz) : off)
+    toz ? out.to(toz) : out
   end
 
-  # parse time and honor desired timezone
-  def self.to_tz(str, zone=nil, ignore_offset=false)
-    ymd, hms, off = parse_str(str, ignore_offset)
-    out = Time.new(*ymd, *hms, off)
-    if zone
-      if off
-        out = out.to_tz(zone)
-      else
-        utc = out.utc
-        off = TZInfo::Timezone.get(zone).utc_to_local(utc) - utc
-        out = Time.new(*ymd, *hms, off)
-      end
-    else
-      out
-    end
+  def self.tz!(str, asz="UTC", toz=nil)
+    tz(str, toz, asz)
   end
 
-  # ignore supplied timezone, use local
-  def self.to_tz!(str, zone=nil)
-    to_tz(str, zone, true)
-  end
-
-  # NOTE: We can clean this up too...
-  # this 1-liner works, but returns a TZInfo::TimeWithOffset???
-  # def in_tz(zone); TZInfo::Timezone.get(zone).to_local(self); end
-
-  # same time moment, different time zone offset
-  def in_tz(zone)
+  # same time moment, different time zone (ie - change time and zone)
+  def to(zone)
     cfg = TZInfo::Timezone.get(zone)
     use = cfg.to_local(self)
     ary = use.to_a[1,5].reverse.push(strftime("%S.%6N").to_f)
     Time.new(*ary, cfg)
   end
 
-  # same time values, different time zone offset
-  def as_tz(zone)
+  # same time values, different time zone (ie - change time zone only)
+  def as(zone)
     cfg = TZInfo::Timezone.get(zone)
     use = self
     ary = use.to_a[1,5].reverse.push(strftime("%S.%6N").to_f)
     Time.new(*ary, cfg)
   end
-
-  alias_method :to_tz , :in_tz
-  alias_method :to_tz!, :as_tz
 end
 
 class String
-  def to_tz(*args)
-    Time.to_tz(self, *args)
-  end
-
-  def to_tz!(*args)
-    Time.to_tz!(self, *args)
-  end
-
   def to_day
     Date.to_day(self)
   end
 
-  def to_day!(fmt="%Y-%m-%d")
+  def iso_date(fmt="%Y-%m-%d")
     to_day.strftime(fmt)
+  end
+
+  def to_tz(*args)
+    Time.tz(self, *args)
+  end
+
+  def to_tz!(*args)
+    Time.tz!(self, *args)
   end
 end
