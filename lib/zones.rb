@@ -1,6 +1,21 @@
 require "tzinfo"
 
+module MonthValue
+  def month_value(str)
+    (val = str.to_i).zero? ? (@month_value ||= {
+      "jan" => 1, "january"  =>  1, "jul" =>  7, "july"      =>  7,
+      "feb" => 2, "february" =>  2, "aug" =>  8, "august"    =>  8,
+      "mar" => 3, "march"    =>  3, "sep" =>  9, "september" =>  9,
+      "apr" => 4, "april"    =>  4, "oct" => 10, "october"   => 10,
+      "may" => 5,                   "nov" => 11, "november"  => 11,
+      "jun" => 6, "june"     =>  6, "dec" => 12, "december"  => 12,
+    })[str.downcase] : val or raise "bad month: #{str}"
+  end
+end
+
 class Date
+  extend MonthValue
+
   def self.parse_str(str)
     case str
     when %r!^((?:19|20)\d\d)(\d\d)(\d\d)(\d\d)!
@@ -19,7 +34,9 @@ class Date
          ((?>19|20)\d\d)                        #  $9: year
       )
     !iox
-      ymd = $1 ? [$3.to_i, month_num($2), $1.to_i] : $4 ? [$4.to_i, $5.to_i, $6.to_i] : [$9.to_i, $7.to_i, $8.to_i]
+      ymd =   $1 ? [ $3.to_i, month_value($2), $1.to_i] : \
+              $4 ? [ $4.to_i, month_value($5), $6.to_i] : \
+                   [ $9.to_i, month_value($7), $8.to_i]
     else
       raise "can't parse: #{str}"
     end
@@ -35,6 +52,8 @@ end
 
 class Time
   def self.parse_str(str, ignore_offset=false)
+  extend MonthValue
+
     case str
     when %r!^((?:19|20)\d\d)(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)?\.?(\d+)?([-+]\d\d:?\d\d)?!
       ymd = [$1.to_i, $2.to_i, $3.to_i]
@@ -60,7 +79,9 @@ class Time
       \s?(?:(a|p)?m)?                           # $14: am/pm
       \s?(([-+])?(\d\d):?(\d\d)|UTC|GMT)?       # $15: offset ($16=sign, $17=hours, $18=mins)
     !iox
-      ymd = $1 ? [$3.to_i, month_num($2), $1.to_i] : $4 ? [$4.to_i, $5.to_i, $6.to_i] : [$9.to_i, $7.to_i, $8.to_i]
+      ymd =   $1 ? [ $3.to_i, month_value($2), $1.to_i] : \
+              $4 ? [ $4.to_i, month_value($5), $6.to_i] : \
+                   [ $9.to_i, month_value($7), $8.to_i]
       hms = [$14 ? ($10.to_i % 12) + (($14=="P" || $14=="p") ? 12 : 0) : $10.to_i, $11.to_i, "#{$12}.#{$13}".to_f]
       off = ($17 ? "#{$16||'+'}#{$17}:#{$18}" : "+00:00") if $15 && !ignore_offset
     else
@@ -69,16 +90,6 @@ class Time
     off ? [ymd, hms, off] : [ymd, hms]
   end
 
-  # get month number
-  def self.month_num(str)
-    (@month_num ||= {
-      "jan" => 1, "january"  =>  1, "jul" =>  7, "july"      =>  7,
-      "feb" => 2, "february" =>  2, "aug" =>  8, "august"    =>  8,
-      "mar" => 3, "march"    =>  3, "sep" =>  9, "septmeber" =>  9,
-      "apr" => 4, "april"    =>  4, "oct" => 10, "october"   => 10,
-      "may" => 5,                   "nov" => 11, "november"  => 11,
-      "jun" => 6, "june"     =>  6, "dec" => 12, "december"  => 12,
-    })[str.downcase] or raise "bad month: #{str}"
   end
 
   # parse time and honor desired timezone
