@@ -18,7 +18,7 @@ class Date
 
   def self.parse_str(str)
     case str
-    when %r!^((?:19|20)\d\d)(\d\d)(\d\d)(\d\d)!
+    when %r!^((?:19|20)\d\d)(\d\d)(\d\d)!
       ymd = [$1.to_i, $2.to_i, $3.to_i]
     when %r!^
       (?:(0[1-9]|[12]\d|3[01]|[1-9][-/ ])[-/ ]? #  $1: day
