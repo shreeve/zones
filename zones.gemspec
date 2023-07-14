@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = "zones"
-  s.version     = "1.0.1"
+  s.version     = "1.1.0"
   s.author      = "Steve Shreeve"
   s.email       = "steve.shreeve@gmail.com"
   s.summary     =

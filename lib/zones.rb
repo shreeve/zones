@@ -94,17 +94,19 @@ class Time
     [ymd, hms, off]
   end
 
-  def self.tz(str, toz=nil, asz=nil)
+  # read values of time in asz, stated, or local timezone, optionally convert to toz timezone
+  def self.to_tz(str, toz=nil, asz=nil)
     ymd, hms, off = parse_str(str)
     out = Time.new(*ymd, *hms, asz ? TZInfo::Timezone.get(asz) : off)
     toz ? out.to(toz) : out
   end
 
-  def self.tz!(str, asz="UTC", toz=nil)
-    tz(str, toz, asz)
+  # swap the order of to_tz and default asz to UTC
+  def self.as_tz(str, asz="UTC", toz=nil)
+    to_tz(str, toz, asz)
   end
 
-  # same time moment, different time zone (ie - change time and zone)
+  # same moment in time, different time zone (ie - change time and zone)
   def to(zone)
     cfg = TZInfo::Timezone.get(zone)
     use = cfg.to_local(self)
@@ -112,7 +114,7 @@ class Time
     Time.new(*ary, cfg)
   end
 
-  # same time values, different time zone (ie - change time zone only)
+  # same values of time, different time zone (ie - change time zone only)
   def as(zone)
     cfg = TZInfo::Timezone.get(zone)
     use = self
@@ -131,10 +133,10 @@ class String
   end
 
   def to_tz(*args)
-    Time.tz(self, *args)
+    Time.to_tz(self, *args)
   end
 
-  def to_tz!(*args)
-    Time.tz!(self, *args)
+  def as_tz(*args)
+    Time.as_tz(self, *args)
   end
 end
